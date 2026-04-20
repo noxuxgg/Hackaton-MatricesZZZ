@@ -212,6 +212,85 @@
   color: #fff;
 }
 
+/* Invitación primer ingreso a simulaciones */
+.simu-hint-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  z-index: 380;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease;
+}
+.simu-hint-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.simu-hint-card {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  bottom: 118px;
+  width: calc(100% - 28px);
+  max-width: 360px;
+  background: #fff;
+  border: .5px solid #dbeafe;
+  border-radius: 14px;
+  box-shadow: 0 14px 38px rgba(0,0,0,.25);
+  padding: 12px;
+  z-index: 390;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+}
+.simu-hint-overlay.show + .simu-hint-card {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.simu-hint-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 3px;
+}
+.simu-hint-text {
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+.simu-hint-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.simu-hint-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 9px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.simu-hint-btn--later {
+  background: #f1f5f9;
+  color: #475569;
+}
+.simu-hint-btn--go {
+  background: linear-gradient(135deg, #2A7B9B 0%, #57C785 100%);
+  color: #fff;
+}
+.simu-target-pulse {
+  position: relative;
+  z-index: 395;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(87, 199, 133, .5), 0 8px 22px rgba(42,123,155,.35);
+  animation: simuPulse 1.25s ease-in-out infinite;
+}
+@keyframes simuPulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1px) scale(1.03); }
+}
+
 </style>
 </head>
 <body>
@@ -270,6 +349,15 @@
     </div>
   </div>
 </div>
+<div class="simu-hint-overlay" id="simu-hint-overlay" aria-hidden="true"></div>
+<div class="simu-hint-card" id="simu-hint-card" role="dialog" aria-modal="true" aria-label="Sugerencia de simulaciones">
+  <div class="simu-hint-title">Probá tus simulaciones guiadas</div>
+  <div class="simu-hint-text">Te recomendamos empezar por <strong>Simulaciones</strong> para practicar ingresos, QR, retos y UFV paso a paso.</div>
+  <div class="simu-hint-actions">
+    <button class="simu-hint-btn simu-hint-btn--later" id="simu-hint-later" type="button">Ahora no</button>
+    <button class="simu-hint-btn simu-hint-btn--go" id="simu-hint-go" type="button">Ir a Simulaciones</button>
+  </div>
+</div>
 
 <div class="qr-row fade-up fd2">
   <a href="pages/cobrar.html" class="qr-btn qr-solid">
@@ -300,7 +388,7 @@
       <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
       <span>Aprender</span> 
     </a>
-    <a href="pages/menu-simulaciones.html" class="action-btn">
+    <a href="pages/menu-simulaciones.html" class="action-btn" id="simulaciones-entry">
       <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg></div>
       <span>Simulaciones</span>
     </a>
@@ -384,8 +472,13 @@
   const retoPopupList = document.getElementById('reto-popup-list');
   const retoPopupClose = document.getElementById('reto-popup-close');
   const retoPopupGo = document.getElementById('reto-popup-go');
+  const simuHintOverlay = document.getElementById('simu-hint-overlay');
+  const simuHintLater = document.getElementById('simu-hint-later');
+  const simuHintGo = document.getElementById('simu-hint-go');
+  const simulacionesEntry = document.getElementById('simulaciones-entry');
   const retoEstado = new URLSearchParams(window.location.search).get('reto');
   const vieneDeSimulacion = retoEstado === 'cumplido' || retoEstado === 'nocumplido';
+  const SIMU_HINT_KEY = 'plata_simu_first_invite_v1';
   let lastScrollY = window.scrollY;
 
   if (retoPopup && retoPopupTitle && retoPopupSub && retoPopupList && vieneDeSimulacion) {
@@ -441,6 +534,41 @@
   if (retoPopupGo) {
     retoPopupGo.addEventListener('click', () => {
       location.href = 'pages/retos-mensuales.html';
+    });
+  }
+
+  function closeSimuHint() {
+    if (simuHintOverlay) {
+      simuHintOverlay.classList.remove('show');
+      simuHintOverlay.setAttribute('aria-hidden', 'true');
+    }
+    if (simulacionesEntry) simulacionesEntry.classList.remove('simu-target-pulse');
+  }
+
+  function openSimuHintFirstTime() {
+    if (!simuHintOverlay || !simulacionesEntry) return;
+    simulacionesEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    simulacionesEntry.classList.add('simu-target-pulse');
+    simuHintOverlay.classList.add('show');
+    simuHintOverlay.setAttribute('aria-hidden', 'false');
+  }
+
+  if (!vieneDeSimulacion && !localStorage.getItem(SIMU_HINT_KEY)) {
+    setTimeout(() => {
+      openSimuHintFirstTime();
+      localStorage.setItem(SIMU_HINT_KEY, '1');
+    }, 900);
+  }
+
+  if (simuHintOverlay) {
+    simuHintOverlay.addEventListener('click', closeSimuHint);
+  }
+  if (simuHintLater) {
+    simuHintLater.addEventListener('click', closeSimuHint);
+  }
+  if (simuHintGo) {
+    simuHintGo.addEventListener('click', () => {
+      location.href = 'pages/menu-simulaciones.html';
     });
   }
 </script>
