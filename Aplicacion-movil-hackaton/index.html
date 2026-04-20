@@ -1,10 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PLATA — Inicio</title>
-<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="assets/css/main.css">
 <style>
 
 /* ——— LOGO ENZ en hero ——— */
@@ -133,6 +133,85 @@
 /* Ocultar el chat-fab original */
 .chat-fab { display: none !important; }
 
+/* Popup de advertencia de reto al ingresar */
+.reto-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 32, 44, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .28s ease;
+}
+.reto-popup-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.reto-popup {
+  width: calc(100% - 28px);
+  max-width: 380px;
+  background: #fff;
+  border-radius: 16px;
+  border: .5px solid #e2e8f0;
+  box-shadow: 0 12px 38px rgba(0,0,0,.2);
+  overflow: hidden;
+  transform: translateY(10px) scale(.98);
+  transition: transform .28s ease;
+}
+.reto-popup-overlay.show .reto-popup {
+  transform: translateY(0) scale(1);
+}
+.reto-popup-hd {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+  border-bottom: .5px solid #fecaca;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #991b1b;
+}
+.reto-popup-bd { padding: 12px 14px; }
+.reto-popup-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.reto-popup-list {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.reto-popup-item {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  padding: 8px 9px;
+  font-size: 11px;
+  color: #9a3412;
+}
+.reto-popup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.reto-popup-actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.reto-popup-close {
+  background: #f1f5f9;
+  color: #475569;
+}
+.reto-popup-go {
+  background: linear-gradient(135deg, #2A7B9B 0%, #57C785 100%);
+  color: #fff;
+}
+
 </style>
 </head>
 <body>
@@ -145,12 +224,12 @@
         <img src="img/logo.png" alt="ENZ">
         <span class="enz-logo-hero-text">ENZ</span>
       </div>
-      <span class="greeting-label" id="saludo">Hola, buen día</span>
-      <span class="hero-name">Juan Pérez</span>
+      <span class="greeting-label" id="saludo">Hola, buen dia</span>
+      <span class="hero-name">Juan Perez</span>
     </div>
     <div class="hero-icons">
       <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
-      <a href="mi-perfil.html" class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg></a>
+      <a href="pages/mi-perfil.html" class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg></a>
     </div>
   </div>
   <div class="balance-label">Saldo disponible</div>
@@ -158,7 +237,7 @@
     <span class="balance-currency">Bs.</span>
     <span class="balance-value" id="balance-val">118.19</span>
   </div>
-  <div class="balance-account">Caja de ahorro · ······9478</div>
+  <div class="balance-account">Caja de ahorro</div>
   <div class="hero-badges">
     <div class="badge badge-green">
       <svg viewBox="0 0 24 24" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -173,15 +252,31 @@
 
 <div class="alert-strip fade-up fd1" id="alert-strip">
   <svg viewBox="0 0 24 24" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-  <span>Tu saldo rinde menos que la inflación. <strong>Conocé la UFV ›</strong></span>
+  <span>Tu saldo rinde menos que la inflación. <strong>Conocé la UFV: podés ahorrar más de lo que rinde una caja de ahorro normal</strong></span>
+</div>
+
+<div class="reto-popup-overlay" id="reto-popup-overlay" aria-hidden="true">
+  <div class="reto-popup" role="dialog" aria-modal="true" aria-label="Advertencia de reto">
+    <div class="reto-popup-hd" id="reto-popup-title">Motivos por los que no ahorraste esta semana</div>
+    <div class="reto-popup-bd">
+      <div class="reto-popup-sub" id="reto-popup-sub">Detectamos gastos ficticios innecesarios que afectaron tu meta:</div>
+      <div class="reto-popup-list" id="reto-popup-list">
+        <div class="reto-popup-item">Delivery extra (3 pedidos): <strong>-Bs. 86.00</strong></div>
+      </div>
+      <div class="reto-popup-actions">
+        <button class="reto-popup-close" id="reto-popup-close" type="button">Cerrar</button>
+        <button class="reto-popup-go" id="reto-popup-go" type="button">Ver mi reto</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="qr-row fade-up fd2">
-  <a href="cobrar.html" class="qr-btn qr-solid">
+  <a href="pages/cobrar.html" class="qr-btn qr-solid">
     <svg viewBox="0 0 24 24" width="15" height="15"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg>
     Cobrar con QR
   </a>
-  <a href="pagar.html" class="qr-btn qr-outline">
+  <a href="pages/pagar.html" class="qr-btn qr-outline">
     <svg viewBox="0 0 24 24" width="15" height="15"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
     Pagar
   </a>
@@ -189,38 +284,42 @@
 
 <section class="actions-section fade-up fd3">
   <div class="actions-grid">
-    <a href="historial-transacciones.html" class="action-btn">
+    <a href="pages/historial-transacciones.html" class="action-btn">
       <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
       <span>Historial</span>
     </a>
-    <a href="safi.html" class="action-btn">
+    <a href="pages/safi.html" class="action-btn">
       <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
       <span>Mi SAFI</span>
     </a>
-    <a href="servicios.html" class="action-btn">
+    <a href="pages/servicios.html" class="action-btn">
       <div class="action-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
       <span>Servicios</span>
     </a>
-    <a href="aprender.html" class="action-btn">
+    <a href="pages/aprender.html" class="action-btn">
       <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-      <span>Aprender</span>
+      <span>Aprender</span> 
+    </a>
+    <a href="pages/menu-simulaciones.html" class="action-btn">
+      <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg></div>
+      <span>Simulaciones</span>
     </a>
   </div>
 </section>
 
-<a href="aprender.html" class="pildora-strip fade-up fd4">
+<a href="pages/aprender.html" class="pildora-strip fade-up fd4">
   <div class="pildora-icon"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
   <div class="pildora-body">
-    <div class="pildora-tag">Píldora del día</div>
-    <div class="pildora-msg">La UFV subió 5,3% desde enero. Tu ahorro en UFV ya vale más que en caja.</div>
+    <div class="pildora-tag">Pildora del dia</div>
+    <div class="pildora-msg">La UFV subio 5,3% desde enero. Tu ahorro en UFV ya vale mas de lo que valdria en una caja de ahorro normal.</div>
   </div>
-  <span class="pildora-arrow">›</span>
+  <span class="pildora-arrow">BOB.</span>
 </a>
 
 <div class="salud-card fade-up fd5">
   <div class="salud-header">
     <span class="salud-title">Tu salud financiera</span>
-    <a href="salud-financiera.html" class="card-link">Ver detalle ›</a>
+    <a href="pages/salud-financiera.html" class="card-link">Ver detalle BOB.</a>
   </div>
   <div class="bar-track"><div class="bar-fill" id="salud-bar" style="width:0%"></div></div>
   <div class="bar-labels"><span>Crítico</span><span>Regular</span><span>Saludable</span></div>
@@ -234,7 +333,7 @@
 <div class="card fade-up fd6" style="margin:14px 16px 0">
   <div class="card-header">
     <span class="card-title">Últimos movimientos</span>
-    <a href="historial-transacciones.html" class="card-link">Ver más</a>
+    <a href="pages/historial-transacciones.html" class="card-link">Ver más</a>
   </div>
   <div class="txn-item">
     <div class="txn-ico out"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
@@ -255,10 +354,10 @@
 
 <div class="pb-nav"></div>
 
-<!-- ══ PESITO FAB (reemplaza el chat-fab original) ══ -->
-<div class="pesito-fab-wrap" onclick="location.href='chatbox.html'">
+<!-- â•â• PESITO FAB (reemplaza el chat-fab original) â•â• -->
+<div class="pesito-fab-wrap" onclick="location.href='pages/chatbox.html'">
   <div class="pesito-bubble" style="position:relative">
-    ¡Hola! ¿Te ayudo? 😊
+    ¡Hola! ¿Te ayudo?
   </div>
   <div class="pesito-btn">
     <img src="img/mascota.jpeg" alt="Pesito">
@@ -268,18 +367,44 @@
 
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span></a>
-  <a href="salud-financiera.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Mi salud</span></a>
-  <a href="chatbox.html" class="nav-center"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
-  <a href="aprender.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Aprender</span></a>
-  <a href="mi-perfil.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Mi perfil</span></a>
+  <a href="pages/salud-financiera.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Mi salud</span></a>
+  <a href="pages/chatbox.html" class="nav-center"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
+  <a href="pages/aprender.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Aprender</span></a>
+  <a href="pages/mi-perfil.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Mi perfil</span></a>
 </nav>
 
-<script src="js/main.js"></script>
+<script src="assets/js/main.js"></script>
 <script>
   // Ocultar burbuja de Pesito al hacer scroll
   const pesitoWrap = document.querySelector('.pesito-fab-wrap');
   const pesitoBubble = document.querySelector('.pesito-bubble');
+  const retoPopup = document.getElementById('reto-popup-overlay');
+  const retoPopupTitle = document.getElementById('reto-popup-title');
+  const retoPopupSub = document.getElementById('reto-popup-sub');
+  const retoPopupList = document.getElementById('reto-popup-list');
+  const retoPopupClose = document.getElementById('reto-popup-close');
+  const retoPopupGo = document.getElementById('reto-popup-go');
+  const retoEstado = new URLSearchParams(window.location.search).get('reto');
+  const vieneDeSimulacion = retoEstado === 'cumplido' || retoEstado === 'nocumplido';
   let lastScrollY = window.scrollY;
+
+  if (retoPopup && retoPopupTitle && retoPopupSub && retoPopupList && vieneDeSimulacion) {
+    if (retoEstado === 'cumplido') {
+      retoPopupTitle.textContent = '¡Cumpliste tu reto semanal!';
+      retoPopupSub.innerHTML = 'Excelente trabajo. <strong>Recomendación:</strong> aumenta tu meta mensual para seguir creciendo.';
+      retoPopupList.innerHTML = '<div class="reto-popup-item" style="background:#e8f5ee;border-color:#86efac;color:#166534">Ahorro logrado esta semana: <strong>+Bs. 240.00</strong></div>';
+      retoPopupGo.textContent = 'Aumentar mi meta';
+    } else if (retoEstado === 'nocumplido') {
+      retoPopupTitle.textContent = 'Motivos por los que no ahorraste esta semana';
+      retoPopupSub.textContent = 'Detectamos gastos ficticios innecesarios que afectaron tu meta:';
+      retoPopupList.innerHTML = '' +
+        '<div class="reto-popup-item">Delivery extra (3 pedidos): <strong>-Bs. 86.00</strong></div>' +
+        '<div class="reto-popup-item">Suscripción premium no usada: <strong>-Bs. 45.00</strong></div>' +
+        '<div class="reto-popup-item">Compra impulsiva de accesorios: <strong>-Bs. 69.00</strong></div>' +
+        '<div class="reto-popup-item">Viajes en taxi evitables: <strong>-Bs. 58.00</strong></div>';
+      retoPopupGo.textContent = 'Ver mi reto';
+    }
+  }
 
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
@@ -298,6 +423,27 @@
       setTimeout(() => pesitoBubble.style.display = 'none', 500);
     }
   }, 5000);
+
+  // Simula notificación al ingresar al inicio
+  setTimeout(() => {
+    if (retoPopup && vieneDeSimulacion) {
+      retoPopup.classList.add('show');
+      retoPopup.setAttribute('aria-hidden', 'false');
+    }
+  }, 650);
+
+  if (retoPopupClose) {
+    retoPopupClose.addEventListener('click', () => {
+      retoPopup.classList.remove('show');
+      retoPopup.setAttribute('aria-hidden', 'true');
+    });
+  }
+  if (retoPopupGo) {
+    retoPopupGo.addEventListener('click', () => {
+      location.href = 'pages/retos-mensuales.html';
+    });
+  }
 </script>
 </body>
 </html>
+

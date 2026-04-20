@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLATA — Chat con Pesito</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+
+/* ——— CHAT HEADER CON LOGO ENZ ——— */
+.chat-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: linear-gradient(160deg, #0a1628 0%, #0d2233 60%, #0e3040 100%);
+  padding: 14px 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+}
+
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-back-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.chat-back-btn:hover { background: rgba(255,255,255,0.15); }
+.chat-back-btn svg { width: 18px; height: 18px; stroke: rgba(255,255,255,0.8); stroke-width: 2; }
+
+/* Logo ENZ en el header */
+.enz-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.enz-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #000;
+}
+.enz-logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.enz-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  font-family: 'DM Sans', sans-serif;
+}
+.enz-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 400;
+}
+
+/* Indicador online */
+.chat-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #57C785;
+  animation: blink 2s ease-in-out infinite;
+}
+.status-txt {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ——— CHAT BODY ——— */
+.chat-body {
+  flex: 1;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: calc(100vh - 200px);
+  padding-bottom: 100px;
+}
+
+/* ——— INTRO PESITO ——— */
+.pesito-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 8px;
+  text-align: center;
+  animation: fadeUp .5s ease both;
+}
+.pesito-avatar-lg {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8f4fd, #c8e6f7);
+  border: 3px solid rgba(42,123,155,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+  box-shadow: 0 8px 24px rgba(42,123,155,0.2);
+  overflow: hidden;
+  animation: float 3s ease-in-out infinite;
+}
+.pesito-avatar-lg img {
+  width: 90px; height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.pesito-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--txt);
+}
+.pesito-desc {
+  font-size: 12px;
+  color: var(--txt2);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ——— MENSAJES ——— */
+.msg-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  animation: fadeUp .3s ease both;
+}
+.msg-row.user {
+  flex-direction: row-reverse;
+}
+
+/* Avatar de Pesito en mensajes */
+.pesito-avatar-sm {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8f4fd, #c8e6f7);
+  border: 1.5px solid rgba(42,123,155,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.pesito-avatar-sm img {
+  width: 32px; height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.msg-bubble {
+  max-width: 78%;
+  padding: 10px 13px;
+  border-radius: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  position: relative;
+}
+
+/* Burbuja de Pesito */
+.msg-bubble.bot {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-bottom-left-radius: 4px;
+  color: var(--txt);
+  box-shadow: var(--sh-sm);
+}
+
+/* Burbuja del usuario */
+.msg-bubble.user {
+  background: var(--grad);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 3px 12px rgba(42,123,155,0.3);
+}
+
+.msg-time {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+  text-align: right;
+}
+.msg-row.user .msg-time { text-align: left; }
+
+/* Tip destacado dentro de mensaje */
+.msg-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: #fffbeb;
+  border-left: 3px solid #EDDD53;
+  border-radius: 0 8px 8px 0;
+  padding: 7px 10px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: #78350f;
+  line-height: 1.45;
+}
+.msg-tip svg { flex-shrink: 0; stroke: #b45309; margin-top: 1px; }
+
+/* Píldora con dato ——— */
+.msg-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(42,123,155,0.08);
+  border: 0.5px solid rgba(42,123,155,0.2);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--azul);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ——— SUGERENCIAS RÁPIDAS ——— */
+.suggestions {
+  display: flex;
+  gap: 7px;
+  padding: 0 14px 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.suggestions::-webkit-scrollbar { display: none; }
+
+.suggestion-chip {
+  flex-shrink: 0;
+  padding: 7px 13px;
+  border-radius: 99px;
+  background: var(--surface);
+  border: 1px solid var(--azul);
+  color: var(--azul);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all .2s;
+}
+.suggestion-chip:hover {
+  background: var(--azul);
+  color: #fff;
+}
+.suggestion-chip:active {
+  transform: scale(0.95);
+}
+
+/* ——— INPUT ÁREA ——— */
+.chat-input-wrap {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: var(--surface);
+  border-top: 0.5px solid var(--border);
+  padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px);
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.07);
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f7fa;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 8px 8px 8px 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.chat-input-row:focus-within {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(42,123,155,0.1);
+}
+
+.chat-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--txt);
+  resize: none;
+  max-height: 80px;
+  line-height: 1.4;
+}
+.chat-input::placeholder { color: var(--muted); }
+
+.chat-send-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--grad);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(42,123,155,0.35);
+}
+.chat-send-btn:hover { transform: scale(1.08); }
+.chat-send-btn:active { transform: scale(0.92); }
+.chat-send-btn svg { stroke: #fff; width: 16px; height: 16px; }
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 13px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--sh-sm);
+  width: fit-content;
+}
+.typing-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: typing 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: .5; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Fecha separadora */
+.date-sep {
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 4px 0 8px;
+  position: relative;
+}
+.date-sep::before, .date-sep::after {
+  content: '';
+  position: absolute;
+  top: 50%; width: 30%;
+  height: 0.5px;
+  background: var(--border);
+}
+.date-sep::before { left: 0; }
+.date-sep::after { right: 0; }
+
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER CON LOGO ENZ ══ -->
+<div class="chat-header fade-up">
+  <div class="chat-header-left">
+    <a href="index.html" class="chat-back-btn">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="enz-logo-wrap">
+      <!-- Logo ENZ -->
+      <img src="img/logo.png" alt="ENZ" class="enz-logo-img">
+      <div class="enz-logo-text">
+        <span class="enz-name">ENZ</span>
+        <span class="enz-sub">Asistente financiero</span>
+      </div>
+    </div>
+  </div>
+  <div class="chat-status">
+    <div class="status-dot"></div>
+    <span class="status-txt">En línea</span>
+  </div>
+</div>
+
+<!-- ══ CUERPO DEL CHAT ══ -->
+<div class="chat-body" id="chat-body">
+
+  <!-- Presentación de Pesito -->
+  <div class="pesito-intro fade-up fd1">
+    <div class="pesito-avatar-lg">
+      <img src="img/mascota.jpeg" alt="Pesito">
+    </div>
+    <div class="pesito-name">¡Hola, soy Pesito! 👋</div>
+    <div class="pesito-desc">Tu consejero financiero boliviano.<br>Preguntame sobre ahorro, UFV, gastos o deudas.</div>
+  </div>
+
+  <div class="date-sep fade-up fd2">Hoy · 18 abril 2026</div>
+
+  <!-- Mensaje bienvenida de Pesito -->
+  <div class="msg-row fade-up fd2">
+    <div class="pesito-avatar-sm">
+      <img src="img/mascota.jpeg" alt="Pesito">
+    </div>
+    <div>
+      <div class="msg-bubble bot">
+        ¡Buen día, Juan! 🌞 Vi que tu saldo está en <strong>Bs. 118.19</strong> y tus gastos obligatorios están un poco altos este mes.
+        <div class="msg-tip">
+          <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Tip: con la inflación en 15,05%, cada día que tu plata está quieta pierde valor. ¡Movilizala!
+        </div>
+      </div>
+      <div class="msg-time">10:00</div>
+    </div>
+  </div>
+
+  <!-- Mensaje usuario -->
+  <div class="msg-row user fade-up fd3">
+    <div>
+      <div class="msg-bubble user">¿Qué me recomendás para ahorrar mejor?</div>
+      <div class="msg-time">10:02</div>
+    </div>
+  </div>
+
+  <!-- Respuesta Pesito con tips -->
+  <div class="msg-row fade-up fd4">
+    <div class="pesito-avatar-sm">
+      <img src="img/mascota.jpeg" alt="Pesito">
+    </div>
+    <div>
+      <div class="msg-bubble bot">
+        ¡Buena pregunta! Acá van mis 3 consejos para vos:
+        <br><br>
+        <strong>1. Regla 65/20/15 🎯</strong><br>
+        Ahora gastás 75% en obligatorios. Intentá bajarlo a 65% — eso libera Bs. 330 extra al mes para ahorro.
+        <br><br>
+        <strong>2. Ahorro en UFV 📈</strong><br>
+        Tu fondo SAFI Fortaleza ya está rindiendo. ¡Seguí aportando aunque sea Bs. 33 por semana!
+        <div class="msg-stat">
+          <svg viewBox="0 0 24 24" width="11" height="11" style="stroke:var(--azul)"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+          UFV subió +5.3% desde enero
+        </div>
+        <div class="msg-tip">
+          <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          La caja de ahorro solo rinde 2% anual. La UFV te protege mucho mejor contra la inflación.
+        </div>
+      </div>
+      <div class="msg-time">10:03</div>
+    </div>
+  </div>
+
+  <!-- Mensaje usuario -->
+  <div class="msg-row user fade-up">
+    <div>
+      <div class="msg-bubble user">¿Cómo funciona la UFV?</div>
+      <div class="msg-time">10:05</div>
+    </div>
+  </div>
+
+  <!-- Respuesta Pesito sobre UFV -->
+  <div class="msg-row fade-up">
+    <div class="pesito-avatar-sm">
+      <img src="img/mascota.jpeg" alt="Pesito">
+    </div>
+    <div>
+      <div class="msg-bubble bot">
+        La <strong>UFV (Unidad de Fomento de Vivienda)</strong> es como un escudo contra la inflación 🛡️
+        <br><br>
+        El BCB la actualiza <em>todos los días</em> según el índice de precios. Hoy está en:
+        <div class="msg-stat">
+          <svg viewBox="0 0 24 24" width="11" height="11" style="stroke:var(--azul)"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          1 UFV = Bs. 3.20875
+        </div>
+        <br>
+        Si ahorrás <strong>Bs. 100</strong> en UFV hoy y la UFV sube 5%, el año que viene tenés equivalente a <strong>Bs. 105</strong>. 💪
+        <div class="msg-tip">
+          <svg viewBox="0 0 24 24" width="14" height="14"><polyline points="9 11 12 14 22 4"/></svg>
+          Podés abrir un Fondo SAFI desde solo Bs. 100. ¡Entrá a "Mi SAFI" para ver tus opciones!
+        </div>
+      </div>
+      <div class="msg-time">10:06</div>
+    </div>
+  </div>
+
+  <!-- Typing indicator (se muestra/oculta con JS) -->
+  <div class="msg-row" id="typing-row" style="display:none">
+    <div class="pesito-avatar-sm">
+      <img src="img/mascota.jpeg" alt="Pesito">
+    </div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ SUGERENCIAS RÁPIDAS ══ -->
+<div class="suggestions" id="suggestions" style="position:fixed;bottom:72px;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface);border-top:0.5px solid var(--border);z-index:99;padding:8px 14px;">
+  <div class="suggestion-chip" onclick="sendSuggestion(this)">¿Cómo mejorar mi puntaje?</div>
+  <div class="suggestion-chip" onclick="sendSuggestion(this)">Explicame el SAFI</div>
+  <div class="suggestion-chip" onclick="sendSuggestion(this)">¿Qué es la canasta básica?</div>
+  <div class="suggestion-chip" onclick="sendSuggestion(this)">Método avalancha</div>
+  <div class="suggestion-chip" onclick="sendSuggestion(this)">¿Cómo ahorrar Bs. 50 más?</div>
+</div>
+
+<!-- ══ INPUT ══ -->
+<div class="chat-input-wrap">
+  <div class="chat-input-row">
+    <textarea
+      class="chat-input"
+      id="chat-input"
+      placeholder="Preguntale algo a Pesito…"
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button class="chat-send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+
+// ── Respuestas de Pesito ──
+const responses = {
+  default: [
+    {
+      text: "¡Buena pregunta! Déjame pensar... 🤔\n\nEso que me preguntás tiene que ver con tu salud financiera. Te recomiendo revisar la sección <strong>Aprender</strong> donde tengo artículos especiales para vos.",
+      tip: "Recordá: pequeños hábitos diarios hacen grandes diferencias en tu bolsillo."
+    },
+    {
+      text: "Mmm, interesante. Lo que puedo decirte es que en Bolivia, con la inflación actual de <strong>15,05%</strong>, lo más importante es que tu plata no esté quieta.",
+      tip: "Cada Bs. 100 que guardás sin invertir vale solo Bs. 86,5 al año siguiente."
+    },
+    {
+      text: "¡Me alegra que preguntes eso! Es una duda muy común. La clave está en <strong>conocer tus números</strong>: cuánto entra, cuánto sale y cuánto guardás.",
+      tip: "Tu meta inmediata: llegar al 20% de ahorro. Ahora estás en 10%. ¡Casi la mitad del camino!"
+    }
+  ],
+  safi: {
+    text: "Las <strong>SAFIs</strong> (Sociedades Administradoras de Fondos de Inversión) son instituciones reguladas por la ASFI que administran tu dinero en fondos colectivos.\n\n✅ Podés entrar desde <strong>Bs. 100</strong>\n✅ Rinden más que una caja de ahorro\n✅ Se ajustan con la UFV",
+    tip: "Tenés 2 fondos activos: Fondo Ahorro UFV (Bs. 330) y Útiles Escolares (Bs. 120). ¡Vas muy bien!"
+  },
+  puntaje: {
+    text: "Tu puntaje actual es <strong>52/100 — Regular</strong>. Para subirlo necesitás:\n\n1️⃣ Reducir obligatorios de 75% a 65%\n2️⃣ Aumentar ahorro de 10% a 20%\n3️⃣ Mantener 15% en personal\n\nCon 3 semanas de disciplina podés llegar a 65+.",
+    tip: "Llevá una lista al mercado esta semana. Eso solo puede ahorrarte Bs. 50–80."
+  },
+  ahorro: {
+    text: "Para ahorrar más, acá van estrategias concretas para Bolivia:\n\n💰 <strong>Regla del 1%:</strong> apartá 1% de cada cobro al instante\n🛒 <strong>Lista de mercado:</strong> reduce impulsos en Bs. 60-100/mes\n⚡ <strong>Débito automático:</strong> configurá un aporte semanal a tu SAFI",
+    tip: "Si apartás solo Bs. 10 al día, en un año tenés Bs. 3.650. ¡Sin sentirlo!"
+  }
+};
+
+function getResponse(msg) {
+  const lower = msg.toLowerCase();
+  if (lower.includes('safi') || lower.includes('fondo') || lower.includes('inversión')) return responses.safi;
+  if (lower.includes('puntaje') || lower.includes('puntaje') || lower.includes('salud') || lower.includes('mejorar')) return responses.puntaje;
+  if (lower.includes('ahorr') || lower.includes('bs. 50') || lower.includes('guardar')) return responses.ahorro;
+  const arr = responses.default;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function createBotMessage(resp) {
+  const body = document.getElementById('chat-body');
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.style.animation = 'fadeUp .3s ease both';
+
+  const now = new Date();
+  const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+  let tipHtml = '';
+  if (resp.tip) {
+    tipHtml = `<div class="msg-tip">
+      <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      ${resp.tip}
+    </div>`;
+  }
+
+  row.innerHTML = `
+    <div class="pesito-avatar-sm">
+      <img src="img/mascota.jpeg" alt="Pesito">
+    </div>
+    <div>
+      <div class="msg-bubble bot">${resp.text.replace(/\n/g, '<br>')}${tipHtml}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+  `;
+
+  const typingRow = document.getElementById('typing-row');
+  body.insertBefore(row, typingRow);
+  scrollBottom();
+}
+
+function createUserMessage(text) {
+  const body = document.getElementById('chat-body');
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.style.animation = 'fadeUp .3s ease both';
+
+  const now = new Date();
+  const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+  row.innerHTML = `
+    <div>
+      <div class="msg-bubble user">${text}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+  `;
+
+  const typingRow = document.getElementById('typing-row');
+  body.insertBefore(row, typingRow);
+  scrollBottom();
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  createUserMessage(text);
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Mostrar typing
+  const typingRow = document.getElementById('typing-row');
+  typingRow.style.display = 'flex';
+  scrollBottom();
+
+  // Responder después de delay
+  setTimeout(() => {
+    typingRow.style.display = 'none';
+    createBotMessage(getResponse(text));
+  }, 1200 + Math.random() * 800);
+}
+
+function sendSuggestion(chip) {
+  const text = chip.textContent;
+  createUserMessage(text);
+
+  const typingRow = document.getElementById('typing-row');
+  typingRow.style.display = 'flex';
+  scrollBottom();
+
+  setTimeout(() => {
+    typingRow.style.display = 'none';
+    createBotMessage(getResponse(text));
+  }, 1000 + Math.random() * 700);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+}
+
+function scrollBottom() {
+  setTimeout(() => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }, 50);
+}
+
+</script>
+</body>
+</html>
