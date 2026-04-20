@@ -1,10 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PLATA — Chat con Pesito</title>
-<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="../assets/css/main.css">
 <style>
 
 /* ——— CHAT HEADER CON LOGO ENZ ——— */
@@ -374,12 +374,12 @@
 <!-- ══ HEADER CON LOGO ENZ ══ -->
 <div class="chat-header fade-up">
   <div class="chat-header-left">
-    <a href="index.html" class="chat-back-btn">
+    <a href="../index.html" class="chat-back-btn">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
     <div class="enz-logo-wrap">
       <!-- Logo ENZ -->
-      <img src="img/logo.png" alt="ENZ" class="enz-logo-img">
+      <img src="../img/logo.png" alt="ENZ" class="enz-logo-img">
       <div class="enz-logo-text">
         <span class="enz-name">ENZ</span>
         <span class="enz-sub">Asistente financiero</span>
@@ -398,7 +398,7 @@
   <!-- Presentación de Pesito -->
   <div class="pesito-intro fade-up fd1">
     <div class="pesito-avatar-lg">
-      <img src="img/mascota.jpeg" alt="Pesito">
+      <img src="../img/mascota.jpeg" alt="Pesito">
     </div>
     <div class="pesito-name">¡Hola, soy Pesito! 👋</div>
     <div class="pesito-desc">Tu consejero financiero boliviano.<br>Preguntame sobre ahorro, UFV, gastos o deudas.</div>
@@ -409,7 +409,7 @@
   <!-- Mensaje bienvenida de Pesito -->
   <div class="msg-row fade-up fd2">
     <div class="pesito-avatar-sm">
-      <img src="img/mascota.jpeg" alt="Pesito">
+      <img src="../img/mascota.jpeg" alt="Pesito">
     </div>
     <div>
       <div class="msg-bubble bot">
@@ -434,7 +434,7 @@
   <!-- Respuesta Pesito con tips -->
   <div class="msg-row fade-up fd4">
     <div class="pesito-avatar-sm">
-      <img src="img/mascota.jpeg" alt="Pesito">
+      <img src="../img/mascota.jpeg" alt="Pesito">
     </div>
     <div>
       <div class="msg-bubble bot">
@@ -469,7 +469,7 @@
   <!-- Respuesta Pesito sobre UFV -->
   <div class="msg-row fade-up">
     <div class="pesito-avatar-sm">
-      <img src="img/mascota.jpeg" alt="Pesito">
+      <img src="../img/mascota.jpeg" alt="Pesito">
     </div>
     <div>
       <div class="msg-bubble bot">
@@ -494,7 +494,7 @@
   <!-- Typing indicator (se muestra/oculta con JS) -->
   <div class="msg-row" id="typing-row" style="display:none">
     <div class="pesito-avatar-sm">
-      <img src="img/mascota.jpeg" alt="Pesito">
+      <img src="../img/mascota.jpeg" alt="Pesito">
     </div>
     <div class="typing-indicator">
       <div class="typing-dot"></div>
@@ -531,10 +531,10 @@
   </div>
 </div>
 
-<script src="js/main.js"></script>
+<script src="../assets/js/main.js"></script>
 <script>
 
-// ── Respuestas de Pesito ──
+// —— Respuestas de Pesito ——
 const responses = {
   default: [
     {
@@ -592,7 +592,7 @@ function createBotMessage(resp) {
 
   row.innerHTML = `
     <div class="pesito-avatar-sm">
-      <img src="img/mascota.jpeg" alt="Pesito">
+      <img src="../img/mascota.jpeg" alt="Pesito">
     </div>
     <div>
       <div class="msg-bubble bot">${resp.text.replace(/\n/g, '<br>')}${tipHtml}</div>
@@ -682,3 +682,4 @@ function scrollBottom() {
 </script>
 </body>
 </html>
+
