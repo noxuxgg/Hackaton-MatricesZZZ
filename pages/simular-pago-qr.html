@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLATA — Simular pago QR</title>
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+
+<div class="topbar fade-up">
+  <a href="menu-simulaciones.html" class="topbar-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver</a>
+  <span class="topbar-title">Simular pago QR</span>
+  <div style="width:34px"></div>
+</div>
+
+<div class="qrpay-card fade-up fd1">
+  <div class="qrpay-head">
+    <div class="qrpay-avatar"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+    <div>
+      <div class="qrpay-name" id="destinatario">Tienda NovaTech SRL</div>
+      <div class="qrpay-meta">NIT: 1029384012 · Banco ENZ · Cuenta QR verificada</div>
+    </div>
+  </div>
+
+  <div class="qrpay-grid">
+    <div class="qrpay-field">
+      <label>Producto</label>
+      <input id="producto" value="Audifonos Bluetooth">
+    </div>
+    <div class="qrpay-field">
+      <label>Monto</label>
+      <input id="monto" type="number" min="1" step="0.01" value="250">
+    </div>
+  </div>
+
+  <div class="qrpay-grid" style="margin-top:10px">
+    <div class="qrpay-field">
+      <label>Referencia QR</label>
+      <input id="referencia" value="QR-ENZ-8472-9901">
+    </div>
+    <div class="qrpay-field">
+      <label>Ciudad</label>
+      <input id="ciudad" value="Cochabamba">
+    </div>
+  </div>
+
+  <div style="margin-top:12px">
+    <button id="btn-pagar" class="btn-primary">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Realizar pago QR
+    </button>
+  </div>
+</div>
+
+<div class="qrpay-saving-box fade-up fd2" id="ahorro-box">
+  Caja ahorro por redondeo: <strong id="ahorro-monto">Bs. 0.00</strong>
+</div>
+
+<div class="card fade-up fd3" id="sugerencia-card" style="margin:12px 16px 0;display:none">
+  <div class="card-header">
+    <span class="card-title">Sugerencia inteligente</span>
+    <span class="tag tag-g">1%</span>
+  </div>
+  <div style="padding:12px 14px 14px;font-size:12px;color:var(--txt2);line-height:1.45">
+    Guarda <strong id="sugerencia-monto" style="color:var(--verde)">Bs. 0.00</strong> (1% del pago) en tu caja de ahorros.
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <button id="btn-rechazar-ahorro" class="sim-btn-rechazar">No, gracias</button>
+      <button id="btn-aceptar-ahorro" class="sim-btn-aceptar">Sí, guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="comprobante" class="qrpay-receipt fade-up fd4" style="display:none">
+  <div class="qrpay-ok">
+    <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    Pago realizado con éxito
+  </div>
+  <div class="qrpay-row"><span>Destinatario</span><strong id="r-dest">-</strong></div>
+  <div class="qrpay-row"><span>Producto</span><strong id="r-prod">-</strong></div>
+  <div class="qrpay-row"><span>Monto pagado</span><strong id="r-monto">-</strong></div>
+  <div class="qrpay-row"><span>Fecha / hora</span><strong id="r-fecha">-</strong></div>
+  <div class="qrpay-row"><span>ID operación</span><strong id="r-id">-</strong></div>
+  <div class="qrpay-row"><span>Aporte a ahorro</span><strong id="r-ahorro">Bs. 0.00</strong></div>
+</div>
+
+<div id="categorias-wrap" style="display:none">
+  <div class="section-lbl fade-up fd5">Clasificacion del gasto (elige el mood de tu compra)</div>
+  <div class="qrpay-chip-row fade-up fd5" id="chips"></div>
+  <div class="info-box blue fade-up fd6" style="margin:10px 16px 0" id="categoria-msg">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>Elegí una categoría para registrar el tipo de gasto.</div>
+  </div>
+  <div class="qrpay-finish-wrap fade-up fd6">
+    <button id="btn-finalizar" class="btn-primary" disabled>
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Aceptar
+    </button>
+  </div>
+</div>
+
+<div class="pb-nav"></div>
+<nav class="bottom-nav">
+  <a href="../index.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span></a>
+  <a href="salud-financiera.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Mi salud</span></a>
+  <a href="chatbox.html" class="nav-center"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
+  <a href="aprender.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Aprender</span></a>
+  <a href="mi-perfil.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Mi perfil</span></a>
+</nav>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/sim-sounds.js"></script>
+<script src="../assets/js/guide.js"></script>
+<script>
+(function () {
+  var guide = null;
+  if (typeof PlataGuide !== 'undefined') {
+    guide = PlataGuide.boot('pagoqr', [
+      { html: 'Paso 1: elegí <strong>producto</strong> y <strong>monto</strong>, luego tocá <strong>Realizar pago QR</strong>.', cta: 'Ok' },
+      { html: 'Paso 2: aceptá o rechazá guardar <strong>1%</strong> en ahorros.', cta: 'Entendido' },
+      { html: 'Paso 3: clasificá el gasto y tocá <strong>Aceptar</strong> para finalizar.', cta: 'Vamos' }
+    ]);
+  }
+  function bs(n) { return 'Bs. ' + (Math.round(n * 100) / 100).toFixed(2); }
+  var ahorroCaja = 0;
+  var pagoActual = 0;
+  var ahorroSugerido = 0;
+  var aporteAplicado = 0;
+
+  var categorias = [
+    { key: 'necesidad', title: 'Necesidad', sub: 'Prioritario', tip: 'Gasto funcional y prioritario. Mantiene control financiero.', icon: '<svg viewBox=\"0 0 24 24\"><path d=\"M3 12l9-9 9 9\"/><path d=\"M5 10v10h14V10\"/></svg>' },
+    { key: 'ocio', title: 'Ocio', sub: 'Recreativo', tip: 'Consumo recreativo. Definí un tope mensual para no excederte.', icon: '<svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 15s1.5 2 4 2 4-2 4-2\"/><circle cx=\"9\" cy=\"10\" r=\"1\"/><circle cx=\"15\" cy=\"10\" r=\"1\"/></svg>' },
+    { key: 'comida', title: 'Comida', sub: 'Alimentación', tip: 'Si es fuera de presupuesto, compensalo en otro rubro.', icon: '<svg viewBox=\"0 0 24 24\"><path d=\"M4 3v7a3 3 0 0 0 3 3v8\"/><path d=\"M8 3v7\"/><path d=\"M12 3v7\"/><path d=\"M19 3v18\"/><path d=\"M16 8h6\"/></svg>' },
+    { key: 'impulsiva', title: 'Compra impulsiva', sub: 'Alerta', tip: 'Espera 24 horas antes de repetir este tipo de compra.', icon: '<svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\"/></svg>' },
+    { key: 'tecnologia', title: 'Producto tecnológico', sub: 'Tech', tip: 'Compará vida útil vs. costo para validar la compra.', icon: '<svg viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"3\" width=\"16\" height=\"14\" rx=\"2\"/><path d=\"M8 21h8\"/><path d=\"M10 17v4\"/><path d=\"M14 17v4\"/></svg>' },
+    { key: 'transporte', title: 'Transporte', sub: 'Movilidad', tip: 'Suma viajes para identificar picos semanales.', icon: '<svg viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"6\" width=\"18\" height=\"10\" rx=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/></svg>' },
+    { key: 'salud', title: 'Salud', sub: 'Bienestar', tip: 'Rubro de alta prioridad, mantené un fondo específico.', icon: '<svg viewBox=\"0 0 24 24\"><path d=\"M12 21s-7-4.5-9-9a5.5 5.5 0 0 1 9-6 5.5 5.5 0 0 1 9 6c-2 4.5-9 9-9 9z\"/></svg>' },
+    { key: 'educacion', title: 'Educación', sub: 'Inversión', tip: 'Inversión de largo plazo: ideal registrarla aparte.', icon: '<svg viewBox=\"0 0 24 24\"><path d=\"M2 7l10-5 10 5-10 5-10-5z\"/><path d=\"M6 10v6c0 1 3 3 6 3s6-2 6-3v-6\"/></svg>' },
+    { key: 'hogar', title: 'Hogar', sub: 'Casa', tip: 'Separa mantenimiento de compras nuevas para mayor claridad.', icon: '<svg viewBox=\"0 0 24 24\"><path d=\"M3 12l9-8 9 8\"/><path d=\"M5 10v10h14V10\"/><path d=\"M10 20v-6h4v6\"/></svg>' }
+  ];
+
+  var btnPagar = document.getElementById('btn-pagar');
+  var montoInput = document.getElementById('monto');
+  var prodInput = document.getElementById('producto');
+  var destEl = document.getElementById('destinatario');
+  var sugerenciaCard = document.getElementById('sugerencia-card');
+  var sugerenciaMonto = document.getElementById('sugerencia-monto');
+  var btnAceptarAhorro = document.getElementById('btn-aceptar-ahorro');
+  var btnRechazarAhorro = document.getElementById('btn-rechazar-ahorro');
+  var ahorroMonto = document.getElementById('ahorro-monto');
+  var comprobante = document.getElementById('comprobante');
+  var categoriasWrap = document.getElementById('categorias-wrap');
+  var chips = document.getElementById('chips');
+  var categoriaMsg = document.getElementById('categoria-msg').querySelector('div');
+  var btnFinalizar = document.getElementById('btn-finalizar');
+  var categoriaSeleccionada = null;
+
+  function sound(fn) {
+    if (typeof SimSounds === 'undefined') return;
+    try { SimSounds.init(); if (SimSounds[fn]) SimSounds[fn](); } catch (e) {}
+  }
+
+  function renderChips() {
+    chips.innerHTML = '';
+    categorias.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'qrpay-chip qrpay-chip--' + c.key;
+      b.innerHTML =
+        '<div class="qrpay-chip-ico">' + c.icon + '</div>' +
+        '<div class="qrpay-chip-body">' +
+          '<div class="qrpay-chip-k">Tipo de gasto</div>' +
+          '<div class="qrpay-chip-v">' + c.title + '</div>' +
+          '<div class="qrpay-chip-s">' + c.sub + '</div>' +
+        '</div>';
+      b.addEventListener('click', function () {
+        chips.querySelectorAll('.qrpay-chip').forEach(function (x) { x.classList.remove('is-active'); });
+        b.classList.add('is-active');
+        categoriaMsg.textContent = c.tip;
+        categoriaSeleccionada = c;
+        btnFinalizar.disabled = false;
+        sound('playAccept');
+      });
+      chips.appendChild(b);
+    });
+  }
+
+  function generarComprobante() {
+    document.getElementById('r-dest').textContent = destEl.textContent;
+    document.getElementById('r-prod').textContent = prodInput.value || '-';
+    document.getElementById('r-monto').textContent = bs(pagoActual);
+    document.getElementById('r-fecha').textContent = new Date().toLocaleString('es-BO');
+    document.getElementById('r-id').textContent = 'TRX-' + Math.floor(Date.now() / 1000);
+    document.getElementById('r-ahorro').textContent = bs(aporteAplicado);
+    comprobante.style.display = 'block';
+    categoriasWrap.style.display = 'block';
+    categoriaSeleccionada = null;
+    btnFinalizar.disabled = true;
+    categoriaMsg.textContent = 'Elegí una categoría para registrar el tipo de gasto.';
+    chips.querySelectorAll('.qrpay-chip').forEach(function (x) { x.classList.remove('is-active'); });
+  }
+
+  btnPagar.addEventListener('click', function () {
+    var monto = parseFloat(String(montoInput.value).replace(',', '.'));
+    if (!monto || monto <= 0 || isNaN(monto)) {
+      montoInput.focus();
+      return;
+    }
+    pagoActual = monto;
+    ahorroSugerido = Math.round(monto * 0.01 * 100) / 100;
+    aporteAplicado = 0;
+    sugerenciaMonto.textContent = bs(ahorroSugerido);
+    sugerenciaCard.style.display = 'block';
+    comprobante.style.display = 'none';
+    categoriasWrap.style.display = 'none';
+    sound('playModalOpen');
+    if (guide) guide.stepDone();
+  });
+
+  btnAceptarAhorro.addEventListener('click', function () {
+    ahorroCaja += ahorroSugerido;
+    aporteAplicado = ahorroSugerido;
+    ahorroMonto.textContent = bs(ahorroCaja);
+    sugerenciaCard.style.display = 'none';
+    generarComprobante();
+    sound('playAccept');
+    if (guide) guide.stepDone();
+  });
+
+  btnRechazarAhorro.addEventListener('click', function () {
+    aporteAplicado = 0;
+    sugerenciaCard.style.display = 'none';
+    generarComprobante();
+    sound('playReject');
+    if (guide) guide.stepDone();
+  });
+
+  btnFinalizar.addEventListener('click', function () {
+    if (!categoriaSeleccionada) return;
+    categoriaMsg.textContent = 'Registro finalizado: "' + categoriaSeleccionada.title + '" guardado correctamente.';
+    sound('playAccept');
+    if (guide) guide.finish();
+  });
+
+  renderChips();
+})();
+</script>
+</body>
+</html>

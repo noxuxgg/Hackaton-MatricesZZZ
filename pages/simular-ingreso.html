@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLATA — Simular ingreso</title>
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+
+<div class="topbar fade-up">
+  <a href="menu-simulaciones.html" class="topbar-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver</a>
+  <span class="topbar-title">Simular ingreso</span>
+  <div style="width:34px"></div>
+</div>
+
+<!-- Sensación de bienestar / castigo (overlay breve) -->
+<div id="feeling-layer" class="sim-feeling-layer" aria-hidden="true"></div>
+
+<!-- Popup Depósito (como si llegara desde el inicio) -->
+<div id="deposit-overlay" class="sim-overlay" role="dialog" aria-modal="true" aria-labelledby="deposit-title">
+  <div class="sim-popup">
+    <div class="sim-popup-handle"></div>
+    <div id="deposit-title" class="sim-popup-title">Depósito virtual</div>
+    <p class="sim-popup-sub">Ingresá un monto de demostración. No se mueve dinero real: solo simulamos cómo se reparte tu ingreso.</p>
+    <div class="sim-input-wrap">
+      <span>Bs.</span>
+      <input type="number" id="deposit-input" inputmode="decimal" min="1" step="0.01" placeholder="0.00" autocomplete="off">
+    </div>
+    <div class="sim-popup-actions">
+      <button type="button" class="btn-ghost" id="deposit-cancel">Ahora no</button>
+      <button type="button" class="btn-primary" id="deposit-ok">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Ingresar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mini “inicio”: saldo pendiente de asignar -->
+<div class="sim-mini-hero fade-up fd1">
+  <div class="sim-mini-label">Ingreso simulado · por asignar</div>
+  <div class="sim-mini-balance" id="pending-display">Bs. 0.00</div>
+  <div class="sim-mini-pending" id="hero-hint">Tocá <strong>+ Depósito</strong> para cargar un monto y repartirlo en tus cajas virtuales.</div>
+</div>
+
+<div class="sim-deposit-fab fade-up fd2">
+  <button type="button" class="sim-deposit-btn" id="open-deposit">
+    <span class="sim-deposit-plus" aria-hidden="true">+</span>
+    <span>Depósito</span>
+  </button>
+</div>
+
+<div class="section-lbl fade-up fd3">Tus cajas virtuales</div>
+<div style="padding:0 16px" class="fade-up fd3">
+  <p style="font-size:11px;color:var(--txt2);line-height:1.45;margin-bottom:8px">Necesidades usa facturas fijas. Ahorro y personal son porcentuales al ingreso. Cada movimiento requiere tu aceptación.</p>
+  <div id="shortage-alert" class="info-box red" style="display:none;margin:0 0 10px 0">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div id="shortage-text">El ingreso no alcanza para cubrir todo.</div>
+  </div>
+  <div class="section-lbl" style="padding:0 0 8px">Necesidades mensuales (marcar/desmarcar)</div>
+  <div class="sim-needs-list" id="needs-list"></div>
+  <div class="sim-cajas-grid">
+    <div class="sim-caja sim-caja--necesidad" id="box-necesidades" data-box="necesidades">
+      <div class="sim-caja-k">Necesidades</div>
+      <div class="sim-caja-v" id="val-necesidades">Bs. 0.00</div>
+      <div class="sim-caja-pct" id="pct-necesidades">0% del ingreso</div>
+    </div>
+    <div class="sim-caja sim-caja--ahorro" id="box-ahorro" data-box="ahorro">
+      <div class="sim-caja-k">Ahorro</div>
+      <div class="sim-caja-v" id="val-ahorro">Bs. 0.00</div>
+      <div class="sim-caja-pct" id="pct-ahorro">0% del ingreso</div>
+    </div>
+    <div class="sim-caja sim-caja--personal" id="box-personal" data-box="personal">
+      <div class="sim-caja-k">Personal</div>
+      <div class="sim-caja-v" id="val-personal">Bs. 0.00</div>
+      <div class="sim-caja-pct" id="pct-personal">0% del ingreso</div>
+    </div>
+    <div class="sim-caja sim-caja--riesgo" id="box-riesgo" data-box="riesgo">
+      <div class="sim-caja-k">Falta / riesgo</div>
+      <div class="sim-caja-v" id="val-riesgo">Bs. 0.00</div>
+      <div class="sim-caja-pct" id="pct-riesgo">0% del ingreso</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-lbl fade-up fd4" id="tx-section-lbl" style="opacity:0.6">Movimientos pendientes</div>
+<div id="tx-container"></div>
+
+<div class="sim-reset-wrap fade-up fd5" id="done-wrap" style="display:none">
+  <div class="info-box green" style="margin:0">
+    <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <div>
+      <div style="font-weight:600;margin-bottom:2px">Simulación completa</div>
+      Revisá cómo quedaron tus cajas. Podés iniciar otra simulación cuando quieras.
+    </div>
+  </div>
+  <button type="button" class="btn-primary" id="btn-restart" style="margin-top:12px">Nueva simulación</button>
+</div>
+
+<div class="pb-nav"></div>
+<nav class="bottom-nav">
+  <a href="../index.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span></a>
+  <a href="salud-financiera.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Mi salud</span></a>
+  <a href="chatbox.html" class="nav-center"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
+  <a href="aprender.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Aprender</span></a>
+  <a href="mi-perfil.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Mi perfil</span></a>
+</nav>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/sim-sounds.js"></script>
+<script src="../assets/js/guide.js"></script>
+<script>
+(function () {
+  var guide = null;
+  if (typeof PlataGuide !== 'undefined') {
+    guide = PlataGuide.boot('ingreso', [
+      { html: 'Paso 1: tocá <strong>+ Depósito</strong> e ingresá un monto para iniciar la simulación.', cta: 'Ok' },
+      { html: 'Paso 2: en <strong>Necesidades mensuales</strong>, marcá/desmarcá facturas para ver cómo afecta tu saldo.', cta: 'Entendido' },
+      { html: 'Paso 3: completá los <strong>Movimientos pendientes</strong> (ahorro y personal) aceptando o rechazando.', cta: 'Vamos' }
+    ]);
+  }
+  const fmt = function (n) {
+    return 'Bs. ' + (Math.round(n * 100) / 100).toFixed(2);
+  };
+  const FIXED_BILLS = [
+    { id: 'agua', label: 'Factura de agua', amount: 38, desc: 'Factura mensual fija de agua potable.', target: 'necesidades', kind: 'fijo', meta: 'Monto fijo mensual' },
+    { id: 'luz', label: 'Factura de luz', amount: 92, desc: 'Consumo mensual simulado de electricidad.', target: 'necesidades', kind: 'fijo', meta: 'Monto fijo mensual' },
+    { id: 'gas', label: 'Factura de gas', amount: 46, desc: 'Pago mensual fijo de gas domiciliario.', target: 'necesidades', kind: 'fijo', meta: 'Monto fijo mensual' },
+    { id: 'internet', label: 'Factura de internet', amount: 120, desc: 'Plan mensual de internet hogar.', target: 'necesidades', kind: 'fijo', meta: 'Monto fijo mensual' },
+    { id: 'alimentos', label: 'Canasta mensual', amount: 280, desc: 'Presupuesto mensual fijo para alimentos.', target: 'necesidades', kind: 'fijo', meta: 'Monto fijo mensual' }
+  ];
+  const PCT_SAVINGS = 0.20;
+  const PCT_PERSONAL = 0.15;
+
+  const overlay = document.getElementById('deposit-overlay');
+  const input = document.getElementById('deposit-input');
+  const openBtn = document.getElementById('open-deposit');
+  const cancelBtn = document.getElementById('deposit-cancel');
+  const okBtn = document.getElementById('deposit-ok');
+  const pendingEl = document.getElementById('pending-display');
+  const heroHint = document.getElementById('hero-hint');
+  const txContainer = document.getElementById('tx-container');
+  const needsList = document.getElementById('needs-list');
+  const feeling = document.getElementById('feeling-layer');
+  const doneWrap = document.getElementById('done-wrap');
+  const btnRestart = document.getElementById('btn-restart');
+  const txSectionLbl = document.getElementById('tx-section-lbl');
+  const shortageAlert = document.getElementById('shortage-alert');
+  const shortageText = document.getElementById('shortage-text');
+
+  const vals = {
+    necesidades: document.getElementById('val-necesidades'),
+    ahorro: document.getElementById('val-ahorro'),
+    personal: document.getElementById('val-personal'),
+    riesgo: document.getElementById('val-riesgo')
+  };
+  const pcts = {
+    necesidades: document.getElementById('pct-necesidades'),
+    ahorro: document.getElementById('pct-ahorro'),
+    personal: document.getElementById('pct-personal'),
+    riesgo: document.getElementById('pct-riesgo')
+  };
+  const boxes = {
+    necesidades: document.getElementById('box-necesidades'),
+    ahorro: document.getElementById('box-ahorro'),
+    personal: document.getElementById('box-personal'),
+    riesgo: document.getElementById('box-riesgo')
+  };
+
+  let totalIngreso = 0;
+  let pending = 0;
+  let amounts = { necesidades: 0, ahorro: 0, personal: 0, riesgo: 0 };
+  let queue = [];
+  let needState = {};
+  let started = false;
+
+  function openDeposit() {
+    overlay.classList.add('is-open');
+    input.focus();
+    if (typeof SimSounds !== 'undefined') {
+      SimSounds.init();
+      try {
+        SimSounds.playModalOpen();
+      } catch (e) {}
+    }
+  }
+  function closeDeposit() {
+    overlay.classList.remove('is-open');
+  }
+
+  function flashFeeling(type) {
+    feeling.classList.remove('flash', 'sim-feeling-layer--good', 'sim-feeling-layer--bad', 'sim-feeling-layer--short');
+    void feeling.offsetWidth;
+    const tone = type === 'good' ? 'sim-feeling-layer--good' : type === 'short' ? 'sim-feeling-layer--short' : 'sim-feeling-layer--bad';
+    feeling.classList.add('flash', tone);
+    feeling.setAttribute('aria-hidden', 'false');
+    setTimeout(function () {
+      feeling.classList.remove('flash', 'sim-feeling-layer--good', 'sim-feeling-layer--bad', 'sim-feeling-layer--short');
+      feeling.setAttribute('aria-hidden', 'true');
+    }, 650);
+  }
+
+  function bumpBox(key, good) {
+    const el = boxes[key];
+    if (!el) return;
+    el.classList.remove('bump-good', 'bump-bad');
+    void el.offsetWidth;
+    el.classList.add(good ? 'bump-good' : 'bump-bad');
+    setTimeout(function () {
+      el.classList.remove('bump-good', 'bump-bad');
+    }, 600);
+  }
+
+  function updatePendingDisplay() {
+    pendingEl.textContent = fmt(pending);
+  }
+
+  function pctText(value) {
+    if (!totalIngreso || totalIngreso <= 0) return '0% del ingreso';
+    return ((value / totalIngreso) * 100).toFixed(1) + '% del ingreso';
+  }
+
+  function updateCajas() {
+    vals.necesidades.textContent = fmt(amounts.necesidades);
+    vals.ahorro.textContent = fmt(amounts.ahorro);
+    vals.personal.textContent = fmt(amounts.personal);
+    vals.riesgo.textContent = fmt(amounts.riesgo);
+    pcts.necesidades.textContent = pctText(amounts.necesidades);
+    pcts.ahorro.textContent = pctText(amounts.ahorro);
+    pcts.personal.textContent = pctText(amounts.personal);
+    pcts.riesgo.textContent = pctText(amounts.riesgo);
+  }
+
+  function buildQueue(income) {
+    return [{
+      id: 'ahorro',
+      label: 'Ahorro programado',
+      desc: 'Porcentaje destinado a tu caja de ahorro virtual.',
+      amount: Math.round(income * PCT_SAVINGS * 100) / 100,
+      target: 'ahorro',
+      meta: (PCT_SAVINGS * 100).toFixed(0) + '% del ingreso'
+    }, {
+      id: 'personal',
+      label: 'Gastos personales',
+      desc: 'Presupuesto personal flexible (ocio y extras).',
+      amount: Math.round(income * PCT_PERSONAL * 100) / 100,
+      target: 'personal',
+      meta: (PCT_PERSONAL * 100).toFixed(0) + '% del ingreso'
+    }];
+  }
+
+  function renderTx() {
+    txContainer.innerHTML = '';
+    if (queue.length === 0) {
+      if (started && pending <= 0.001) {
+        txSectionLbl.style.opacity = '0.5';
+        doneWrap.style.display = 'block';
+      } else if (!started) {
+        txContainer.innerHTML = '<div class="sim-empty-tx">Aún no hay movimientos. Usá <strong>+ Depósito</strong> para comenzar.</div>';
+      }
+      return;
+    }
+    doneWrap.style.display = 'none';
+    txSectionLbl.style.opacity = '1';
+
+    var tx = queue[0];
+    var isShort = pending < tx.amount;
+    var shortageLine = '';
+    if (isShort) {
+      shortageLine = '<div class="info-box red" style="margin:0 0 12px 0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>Saldo insuficiente: faltan <strong>' + fmt(tx.amount - pending) + '</strong> para cubrir este movimiento.</div></div>';
+    }
+    var card = document.createElement('div');
+    card.className = 'sim-tx-card is-highlight fade-up' + (isShort ? ' is-short' : '');
+    card.innerHTML =
+      '<div class="sim-tx-head">' +
+        '<div class="sim-tx-name">' + tx.label + '</div>' +
+        '<div class="sim-tx-amt">' + fmt(tx.amount) + '</div>' +
+      '</div>' +
+      '<div class="sim-tx-desc">' + tx.desc + ' · <strong>' + tx.meta + '</strong></div>' +
+      shortageLine +
+      '<div class="sim-tx-btns">' +
+        '<button type="button" class="sim-btn-rechazar" data-act="reject">' +
+          '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+          'Rechazar' +
+        '</button>' +
+        '<button type="button" class="sim-btn-aceptar" data-act="accept">' +
+          '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' +
+          'Aceptar' +
+        '</button>' +
+      '</div>';
+
+    card.querySelector('[data-act="accept"]').addEventListener('click', function () {
+      onDecision(true);
+    });
+    card.querySelector('[data-act="reject"]').addEventListener('click', function () {
+      onDecision(false);
+    });
+
+    txContainer.appendChild(card);
+  }
+
+  function showShortage(deficit, label) {
+    shortageAlert.style.display = 'flex';
+    shortageText.innerHTML = 'No alcanza para cubrir <strong>' + label + '</strong>. Faltan <strong>' + fmt(deficit) + '</strong>.';
+    heroHint.innerHTML = 'Sentiste la falta de dinero. Necesitás más ingreso o reducir gastos fijos.';
+    flashFeeling('short');
+    bumpBox('riesgo', false);
+    if (typeof SimSounds !== 'undefined') {
+      try {
+        SimSounds.playInsufficient();
+      } catch (e) {}
+    }
+  }
+
+  function renderNeedsList() {
+    needsList.innerHTML = '';
+    FIXED_BILLS.forEach(function (bill) {
+      var checked = !!needState[bill.id];
+      var row = document.createElement('div');
+      row.className = 'sim-need-item ' + (checked ? 'is-checked' : 'is-rejected');
+      row.innerHTML =
+        '<div class="sim-need-main">' +
+          '<div class="sim-need-name">' + bill.label + '</div>' +
+          '<div class="sim-need-meta">' + (checked ? 'Aceptado' : 'Rechazado') + ' · monto fijo mensual</div>' +
+        '</div>' +
+        '<div class="sim-need-right">' +
+          '<div class="sim-need-amt">' + fmt(bill.amount) + '</div>' +
+          '<button type="button" class="sim-need-toggle ' + (checked ? 'is-on' : '') + '" aria-label="' + bill.label + '">' +
+            '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' +
+          '</button>' +
+        '</div>';
+      row.querySelector('.sim-need-toggle').addEventListener('click', function () {
+        toggleNeed(bill.id);
+      });
+      needsList.appendChild(row);
+    });
+  }
+
+  function toggleNeed(id) {
+    var bill = FIXED_BILLS.find(function (x) { return x.id === id; });
+    if (!bill || !started) return;
+    var currentlyOn = !!needState[id];
+
+    if (!currentlyOn) {
+      if (pending < bill.amount) {
+        showShortage(bill.amount - pending, bill.label);
+        renderNeedsList();
+        return;
+      }
+      needState[id] = true;
+      amounts.necesidades += bill.amount;
+      pending = Math.max(0, pending - bill.amount);
+      shortageAlert.style.display = 'none';
+      flashFeeling('good');
+      bumpBox('necesidades', true);
+      if (typeof SimSounds !== 'undefined') {
+        try {
+          SimSounds.playAccept();
+        } catch (e) {}
+      }
+    } else {
+      needState[id] = false;
+      amounts.necesidades = Math.max(0, amounts.necesidades - bill.amount);
+      pending += bill.amount;
+      flashFeeling('bad');
+      bumpBox('necesidades', false);
+      if (typeof SimSounds !== 'undefined') {
+        try {
+          SimSounds.playReject();
+        } catch (e) {}
+      }
+    }
+
+    updatePendingDisplay();
+    updateCajas();
+    renderNeedsList();
+    if (guide) guide.stepDone();
+  }
+
+  function onDecision(accepted) {
+    if (queue.length === 0) return;
+    var tx = queue.shift();
+    var amt = tx.amount;
+
+    if (accepted) {
+      var paid = Math.min(pending, amt);
+      var deficit = Math.max(0, amt - paid);
+      if (paid > 0) {
+        amounts[tx.target] += paid;
+        pending = Math.max(0, pending - paid);
+        bumpBox(tx.target, true);
+      }
+      if (deficit > 0) {
+        amounts.riesgo += deficit;
+        showShortage(deficit, tx.label);
+      } else {
+        shortageAlert.style.display = 'none';
+        flashFeeling('good');
+        if (typeof SimSounds !== 'undefined') {
+          try {
+            SimSounds.playAccept();
+          } catch (e) {}
+        }
+      }
+    } else {
+      amounts.riesgo += amt;
+      pending = Math.max(0, pending - Math.min(pending, amt));
+      flashFeeling('bad');
+      bumpBox('riesgo', false);
+      shortageAlert.style.display = 'none';
+      if (typeof SimSounds !== 'undefined') {
+        try {
+          SimSounds.playReject();
+        } catch (e) {}
+      }
+    }
+    updatePendingDisplay();
+    updateCajas();
+
+    if (queue.length === 0) {
+      if (amounts.riesgo > 0) {
+        heroHint.innerHTML = 'Terminaste con <strong style="color:var(--danger)">faltante/riesgo</strong>. Ajustá tus decisiones o subí ingreso.';
+      } else {
+        heroHint.innerHTML = 'Todo el ingreso fue <strong>asignado</strong> sin faltantes. Buen control financiero.';
+      }
+      if (guide) guide.finish();
+    }
+    renderTx();
+  }
+
+  function startSimulation(income) {
+    if (!started) {
+      totalIngreso = 0;
+      pending = 0;
+      amounts = { necesidades: 0, ahorro: 0, personal: 0, riesgo: 0 };
+      needState = {};
+      queue = [];
+      started = true;
+    }
+    totalIngreso += income;
+    pending += income;
+
+    var coveredShortage = 0;
+    if (amounts.riesgo > 0 && pending > 0) {
+      coveredShortage = Math.min(amounts.riesgo, pending);
+      amounts.riesgo = Math.max(0, amounts.riesgo - coveredShortage);
+      pending = Math.max(0, pending - coveredShortage);
+      bumpBox('riesgo', true);
+      if (amounts.riesgo > 0) {
+        shortageAlert.style.display = 'flex';
+        shortageText.innerHTML = 'Aún queda faltante por cubrir: <strong>' + fmt(amounts.riesgo) + '</strong>.';
+      } else {
+        shortageAlert.style.display = 'none';
+      }
+    }
+
+    queue = queue.concat(buildQueue(income));
+    doneWrap.style.display = 'none';
+    if (coveredShortage === 0) {
+      shortageAlert.style.display = 'none';
+    }
+    var fixedTotal = FIXED_BILLS.reduce(function (acc, item) { return acc + item.amount; }, 0);
+    if (coveredShortage > 0) {
+      heroHint.innerHTML = 'Depósito agregado: <strong>' + fmt(income) + '</strong>. Se cubrió faltante por <strong>' + fmt(coveredShortage) + '</strong>.';
+    } else {
+      heroHint.innerHTML = 'Depósito agregado: <strong>' + fmt(income) + '</strong>. Necesidades fijas: <strong>' + fmt(fixedTotal) + '</strong>. Ahorro: <strong>' + (PCT_SAVINGS * 100) + '%</strong> · Personal: <strong>' + (PCT_PERSONAL * 100) + '%</strong>.';
+    }
+    updatePendingDisplay();
+    updateCajas();
+    renderNeedsList();
+    renderTx();
+  }
+
+  function resetAll() {
+    totalIngreso = 0;
+    pending = 0;
+    amounts = { necesidades: 0, ahorro: 0, personal: 0, riesgo: 0 };
+    queue = [];
+    needState = {};
+    started = false;
+    doneWrap.style.display = 'none';
+    shortageAlert.style.display = 'none';
+    heroHint.textContent = 'Tocá + Depósito para cargar un monto y simular el reparto mensual.';
+    updatePendingDisplay();
+    updateCajas();
+    renderNeedsList();
+    renderTx();
+    openDeposit();
+  }
+
+  openBtn.addEventListener('click', openDeposit);
+  cancelBtn.addEventListener('click', closeDeposit);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeDeposit();
+  });
+  okBtn.addEventListener('click', function () {
+    var v = parseFloat(String(input.value).replace(',', '.'));
+    if (!v || v <= 0 || isNaN(v)) {
+      input.focus();
+      return;
+    }
+    closeDeposit();
+    if (typeof SimSounds !== 'undefined') {
+      try {
+        SimSounds.playDepositOk();
+      } catch (e) {}
+    }
+    startSimulation(v);
+    if (guide) guide.stepDone();
+  });
+  btnRestart.addEventListener('click', resetAll);
+
+  /* Popup al cargar (como notificación desde el “inicio”) */
+  setTimeout(function () {
+    openDeposit();
+  }, 450);
+
+  updateCajas();
+  renderNeedsList();
+  renderTx();
+})();
+</script>
+</body>
+</html>

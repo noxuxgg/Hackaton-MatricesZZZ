@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLATA — Inversión en UFV</title>
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+
+<div class="topbar fade-up">
+  <a href="menu-simulaciones.html" class="topbar-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver</a>
+  <span class="topbar-title">Inversión UFV</span>
+  <div style="width:34px"></div>
+</div>
+
+<div class="ufv-hero fade-up fd1">
+  <div class="ufv-hero-k">Valor UFV hoy</div>
+  <div class="ufv-hero-v" id="ufv-hoy">UFV 0.000000</div>
+  <div class="ufv-hero-sub">La UFV ayuda a que tu ahorro mantenga su poder de compra. Esta es una simulación educativa con una <strong>caja especial UFV</strong>.</div>
+</div>
+
+<div class="ufv-stats fade-up fd2">
+  <div class="ufv-stat">
+    <div class="ufv-stat-k">Mi caja UFV (Bs.)</div>
+    <div class="ufv-stat-v" id="ufv-caja-bs">Bs. 0.00</div>
+  </div>
+  <div class="ufv-stat">
+    <div class="ufv-stat-k">Ganancia desde inversión</div>
+    <div class="ufv-stat-v pos" id="ufv-ganancia">+Bs. 0.00</div>
+  </div>
+  <div class="ufv-stat">
+    <div class="ufv-stat-k">UFV compradas</div>
+    <div class="ufv-stat-v" id="ufv-unidades">0.0000</div>
+  </div>
+  <div class="ufv-stat">
+    <div class="ufv-stat-k">Mi UFV inicial</div>
+    <div class="ufv-stat-v" id="ufv-inicial">UFV —</div>
+  </div>
+</div>
+
+<div class="ufv-sim-note fade-up fd2">
+  <strong>Simulación:</strong> los valores UFV y el “rendimiento” son demostrativos para aprendizaje. No es una recomendación financiera.
+</div>
+
+<div class="ufv-pill fade-up fd3" id="ufv-msg">
+  Tip simple: si podés, invertí en UFV de a poco y con constancia. Empezá con un monto chico, y aumentá cuando te sea cómodo.
+</div>
+
+<div class="ufv-chart-card fade-up fd3">
+  <div class="ufv-chart-hd">
+    <div>
+      <div class="ufv-chart-title">Crecimiento en el tiempo</div>
+      <div class="ufv-chart-sub" id="ufv-chart-sub">UFV y valor de tu caja</div>
+    </div>
+    <div class="ufv-chart-sub" id="ufv-chart-range">30 días</div>
+  </div>
+  <div class="ufv-chart-bd">
+    <svg class="ufv-chart-svg" viewBox="0 0 340 140" preserveAspectRatio="none" aria-label="Grafica de crecimiento">
+      <g class="ufv-chart-grid">
+        <line x1="0" y1="35" x2="340" y2="35"></line>
+        <line x1="0" y1="70" x2="340" y2="70"></line>
+        <line x1="0" y1="105" x2="340" y2="105"></line>
+      </g>
+      <path id="ufv-chart-area" class="ufv-chart-area" d=""></path>
+      <path id="ufv-chart-line" class="ufv-chart-line" d=""></path>
+      <circle id="ufv-chart-dot" class="ufv-chart-dot" cx="0" cy="0" r="5"></circle>
+    </svg>
+    <div class="ufv-range">
+      <button type="button" id="ufv-r-7" class="">7 días</button>
+      <button type="button" id="ufv-r-30" class="is-active">30 días</button>
+      <button type="button" id="ufv-r-180" class="">6 meses</button>
+    </div>
+  </div>
+</div>
+
+<div class="ufv-actions fade-up fd4">
+  <button class="btn-primary" id="btn-ufv-invertir" type="button">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    Invertir en UFV
+  </button>
+  <button class="btn-ghost" id="btn-ufv-reset" type="button">Reiniciar simulación UFV</button>
+</div>
+
+<!-- Modal invertir -->
+<div id="ufv-overlay" class="sim-overlay" role="dialog" aria-modal="true" aria-labelledby="ufv-title">
+  <div class="sim-popup">
+    <div class="sim-popup-handle"></div>
+    <div id="ufv-title" class="sim-popup-title">Invertir en UFV (simulado)</div>
+    <p class="sim-popup-sub">Elegí un monto en Bs. y lo convertimos a UFV con el valor de hoy. Tu caja UFV es separada del resto.</p>
+    <div class="sim-input-wrap">
+      <span>Bs.</span>
+      <input type="number" id="ufv-input" inputmode="decimal" min="1" step="0.01" placeholder="0.00" autocomplete="off">
+    </div>
+    <div class="info-box blue" style="margin:0 0 12px">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>En esta demo, la “ganancia” depende de cómo cambió el valor UFV desde tu inversión inicial.</div>
+    </div>
+    <div class="sim-popup-actions">
+      <button type="button" class="btn-ghost" id="ufv-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="ufv-ok">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar inversión
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="pb-nav"></div>
+<nav class="bottom-nav">
+  <a href="../index.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span></a>
+  <a href="salud-financiera.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Mi salud</span></a>
+  <a href="chatbox.html" class="nav-center"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
+  <a href="aprender.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Aprender</span></a>
+  <a href="mi-perfil.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Mi perfil</span></a>
+</nav>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/sim-sounds.js"></script>
+<script src="../assets/js/guide.js"></script>
+<script>
+(function () {
+  var guide = null;
+  if (typeof PlataGuide !== 'undefined') {
+    guide = PlataGuide.boot('ufv', [
+      { html: 'Paso 1: tocá <strong>Invertir en UFV</strong> y confirmá una inversión simulada.', cta: 'Ok' },
+      { html: 'Paso 2: mirá la gráfica y cambiá el rango (7 días, 30 días, 6 meses).', cta: 'Entendido' },
+      { html: 'Paso 3: ¡Listo! La guía te dará la opción de finalizar.', cta: 'Vamos' }
+    ]);
+  }
+  function bs(n) { return 'Bs. ' + (Math.round(n * 100) / 100).toFixed(2); }
+  function ufv(n) { return 'UFV ' + (Math.round(n * 1000000) / 1000000).toFixed(6); }
+
+  // Valores simulados (puedes cambiarlos luego por datos reales)
+  var UFV_HOY = 2.660321;
+  var UFV_BASE = 2.620500; // valor de referencia para simular “desde que invertiste”
+
+  var key = 'plata_ufv_box_v1';
+  var state = { investedBs: 0, units: 0, ufvInicial: null, ts: null };
+
+  var elHoy = document.getElementById('ufv-hoy');
+  var elCaja = document.getElementById('ufv-caja-bs');
+  var elGan = document.getElementById('ufv-ganancia');
+  var elUnits = document.getElementById('ufv-unidades');
+  var elIni = document.getElementById('ufv-inicial');
+  var elMsg = document.getElementById('ufv-msg');
+  var chartArea = document.getElementById('ufv-chart-area');
+  var chartLine = document.getElementById('ufv-chart-line');
+  var chartDot = document.getElementById('ufv-chart-dot');
+  var chartRange = document.getElementById('ufv-chart-range');
+  var r7 = document.getElementById('ufv-r-7');
+  var r30 = document.getElementById('ufv-r-30');
+  var r180 = document.getElementById('ufv-r-180');
+  var rangeDays = 30;
+
+  var overlay = document.getElementById('ufv-overlay');
+  var btnInv = document.getElementById('btn-ufv-invertir');
+  var btnReset = document.getElementById('btn-ufv-reset');
+  var input = document.getElementById('ufv-input');
+  var btnOk = document.getElementById('ufv-ok');
+  var btnCancel = document.getElementById('ufv-cancel');
+
+  function sound(fn) {
+    if (typeof SimSounds === 'undefined') return;
+    try { SimSounds.init(); SimSounds[fn] && SimSounds[fn](); } catch (e) {}
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(key);
+      if (raw) state = JSON.parse(raw);
+    } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem(key, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function calcCajaActualBs() {
+    return state.units * UFV_HOY;
+  }
+  function calcGanancia() {
+    if (!state.units || !state.ufvInicial) return 0;
+    var inicialBs = state.units * state.ufvInicial;
+    var actualBs = state.units * UFV_HOY;
+    return actualBs - inicialBs;
+  }
+
+  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+  function buildSeries(days) {
+    // serie simulada: crecimiento suave desde UFV_BASE -> UFV_HOY con ruido leve
+    var pts = [];
+    var start = UFV_BASE;
+    var end = UFV_HOY;
+    for (var i = 0; i < days; i++) {
+      var t = days <= 1 ? 1 : i / (days - 1);
+      var base = start + (end - start) * t;
+      var wobble = Math.sin(i * 0.55) * 0.0018 + Math.cos(i * 0.22) * 0.0012;
+      pts.push(base + wobble);
+    }
+    return pts;
+  }
+
+  function toPath(values) {
+    var w = 340, h = 140;
+    var padTop = 12, padBottom = 16, padX = 8;
+    var min = Math.min.apply(null, values);
+    var max = Math.max.apply(null, values);
+    if (max - min < 1e-9) { max = min + 0.001; }
+    function x(i) { return padX + (w - padX * 2) * (values.length <= 1 ? 1 : i / (values.length - 1)); }
+    function y(v) {
+      var t = (v - min) / (max - min);
+      return padTop + (h - padTop - padBottom) * (1 - t);
+    }
+    var d = '';
+    for (var i = 0; i < values.length; i++) {
+      d += (i === 0 ? 'M' : 'L') + x(i).toFixed(2) + ' ' + y(values[i]).toFixed(2) + ' ';
+    }
+    var lastX = x(values.length - 1);
+    var lastY = y(values[values.length - 1]);
+    var area = d + 'L ' + lastX.toFixed(2) + ' ' + (h - padBottom).toFixed(2) + ' L ' + x(0).toFixed(2) + ' ' + (h - padBottom).toFixed(2) + ' Z';
+    return { line: d.trim(), area: area.trim(), dot: { x: lastX, y: lastY } };
+  }
+
+  function renderChart() {
+    var s = buildSeries(rangeDays);
+    var p = toPath(s);
+    chartArea.setAttribute('d', p.area);
+    chartLine.setAttribute('d', p.line);
+    chartDot.setAttribute('cx', p.dot.x.toFixed(2));
+    chartDot.setAttribute('cy', p.dot.y.toFixed(2));
+    chartRange.textContent = rangeDays === 7 ? '7 días' : rangeDays === 30 ? '30 días' : '6 meses';
+  }
+
+  function setRange(days) {
+    rangeDays = days;
+    r7.classList.toggle('is-active', days === 7);
+    r30.classList.toggle('is-active', days === 30);
+    r180.classList.toggle('is-active', days === 180);
+    renderChart();
+    sound('playAccept');
+    if (guide) guide.stepDone();
+  }
+
+  function render() {
+    elHoy.textContent = ufv(UFV_HOY);
+    var caja = calcCajaActualBs();
+    elCaja.textContent = bs(caja);
+    elUnits.textContent = (Math.round(state.units * 10000) / 10000).toFixed(4);
+    elIni.textContent = state.ufvInicial ? ufv(state.ufvInicial) : 'UFV —';
+
+    var g = calcGanancia();
+    elGan.textContent = (g >= 0 ? '+' : '') + bs(g);
+    elGan.classList.toggle('pos', g >= 0);
+    elGan.classList.toggle('neg', g < 0);
+
+    if (!state.ts) {
+      elMsg.innerHTML = 'Todavía no invertiste en UFV. <strong>Probá con Bs. 50 o Bs. 100</strong> para empezar con calma.';
+    } else {
+      var since = new Date(state.ts);
+      elMsg.innerHTML = 'Invertiste el <strong>' + since.toLocaleDateString('es-BO') + '</strong>. Tu caja UFV ahora vale <strong>' + bs(caja) + '</strong>.';
+    }
+    renderChart();
+  }
+
+  function openModal() {
+    overlay.classList.add('is-open');
+    input.focus();
+    sound('playModalOpen');
+  }
+  function closeModal() {
+    overlay.classList.remove('is-open');
+  }
+
+  btnInv.addEventListener('click', openModal);
+  btnCancel.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+  btnOk.addEventListener('click', function () {
+    var v = parseFloat(String(input.value).replace(',', '.'));
+    if (!v || v <= 0 || isNaN(v)) { input.focus(); return; }
+
+    // Si es la primera inversión, fija ufvInicial “desde que invertiste”
+    if (!state.ufvInicial) state.ufvInicial = UFV_BASE;
+    if (!state.ts) state.ts = Date.now();
+
+    state.investedBs += v;
+    // Convertimos Bs -> UFV units (usando el valor de hoy)
+    state.units += (v / UFV_HOY);
+    save();
+    render();
+    closeModal();
+    sound('playAccept');
+    input.value = '';
+    if (guide) guide.stepDone();
+  });
+
+  btnReset.addEventListener('click', function () {
+    state = { investedBs: 0, units: 0, ufvInicial: null, ts: null };
+    save();
+    render();
+    sound('playReject');
+    if (guide) guide.finish();
+  });
+
+  load();
+  render();
+  r7.addEventListener('click', function () { setRange(7); });
+  r30.addEventListener('click', function () { setRange(30); });
+  r180.addEventListener('click', function () { setRange(180); });
+})();
+</script>
+</body>
+</html>
